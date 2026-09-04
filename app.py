@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.db import init_db
 from utils.auth import ensure_default_admin, login
-from utils.styles import inject_global_css
+from utils.styles import inject_login_css
 
 st.set_page_config(
     page_title="Gym Admin Panel",
@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-inject_global_css()
+inject_login_css()
 
 GYM_NAME = st.secrets.get("GYM_NAME", "IRON PULSE GYM")
 
