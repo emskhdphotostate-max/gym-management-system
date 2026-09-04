@@ -1,7 +1,6 @@
 import streamlit as st
-from utils.auth import check_auth, render_sidebar_auth, init_auth_state
 from utils.db import init_db
-from utils.styles import load_custom_styles
+from utils.auth import check_password
 
 # Page configuration
 st.set_page_config(
@@ -11,8 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load custom styles & hide default Streamlit top sidebar nav
-load_custom_styles()
+# Hide default Streamlit top sidebar nav using CSS
 st.markdown(
     """
     <style>
@@ -25,21 +23,31 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Initialize Database & Auth State
+# Initialize Database
 init_db()
-init_auth_state()
 
 # Check authentication
-if not check_auth():
-    render_sidebar_auth()
+if not check_password():
     st.stop()
 
-# Render Custom Sidebar for Authenticated Users
-render_sidebar_auth()
+# Main App Navigation & Pages Setup (Aap ka original code)
+st.sidebar.title("IRON PULSE GYM")
+st.sidebar.write(f"Logged in as **{st.session_state.get('username', 'admin')}**")
 
-# Main Dashboard Content Redirect / Display
-# (Aap ka jo bhi baki code ya redirection yahan pehle se thi, wohi rahe gi)
-st.title("🏋️‍♂️ Iron Pulse Gym Management System")
-st.write("Welcome to the dashboard. Use the custom sidebar navigation on the left to switch between pages.")
+st.sidebar.markdown("---")
+st.sidebar.page_link("app.py", label="Dashboard", icon="📊")
+st.sidebar.page_link("pages/2_Members.py", label="Members", icon="👥")
+st.sidebar.page_link("pages/3_Fee_Chalan.py", label="Fee / Chalan", icon="💳")
+st.sidebar.page_link("pages/4_Timing.py", label="Gym Timing", icon="⏰")
+st.sidebar.page_link("pages/5_Reports.py", label="Reports / PDF Export", icon="📄")
 
-# Agar aap yahan koi aur default view dikhana chahtay hain toh woh add kar saktay hain.
+st.sidebar.markdown("---")
+if st.sidebar.button("Logout", use_container_width=True):
+    st.session_state["password_correct"] = False
+    st.rerun()
+
+# Dashboard Content
+st.title("📊 Dashboard")
+st.write("Quick overview of your gym's performance")
+
+# Baqi ka dashboard content agar aap ka mazeed hai toh woh yahan aayega
