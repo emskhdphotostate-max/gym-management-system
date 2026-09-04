@@ -3,6 +3,9 @@ import streamlit as st
 # ---------- Login page theme (dark blue, matches the reference design) ----------
 LOGIN_CSS = """
 <style>
+    div[data-testid="stSidebarNav"] {
+        display: none;
+    }
     html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 
     .stApp {
@@ -38,9 +41,12 @@ LOGIN_CSS = """
 # ---------- Internal app theme (light, readable, dark sidebar) ----------
 APP_CSS = """
 <style>
-    html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
+    /* Hide Streamlit's auto-generated page nav (we use our own custom menu below it) */
+    div[data-testid="stSidebarNav"] {
+        display: none;
+    }
 
-    /* Light, clean main background */
+    html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
     .stApp {
         background: #f4f5fa;
     }
