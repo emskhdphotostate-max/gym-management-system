@@ -1,10 +1,10 @@
 import streamlit as st
 from utils.auth import require_login, logout
-from utils.styles import inject_global_css
+from utils.styles import inject_app_css
 from utils.db import get_dashboard_stats, get_all_members, get_setting
 
 st.set_page_config(page_title="Dashboard | Gym Admin", page_icon="assets/logo.png", layout="wide")
-inject_global_css()
+inject_app_css()
 require_login()
 
 GYM_NAME = st.secrets.get("GYM_NAME", "IRON PULSE GYM")
@@ -24,27 +24,25 @@ with st.sidebar:
         logout()
         st.switch_page("app.py")
 
-st.markdown('<div class="gym-card">', unsafe_allow_html=True)
-st.title("📊 Dashboard")
-st.caption("Quick overview of your gym's performance")
+with st.container(border=True):
+    st.title("📊 Dashboard")
+    st.caption("Quick overview of your gym's performance")
 
-stats = get_dashboard_stats()
+    stats = get_dashboard_stats()
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total Members", stats["total_members"])
-c2.metric("Active Members", stats["active_members"])
-c3.metric("This Month Income", f"Rs. {stats['this_month_income']:,.0f}")
-c4.metric("Total Income (All Time)", f"Rs. {stats['total_income']:,.0f}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Total Members", stats["total_members"])
+    c2.metric("Active Members", stats["active_members"])
+    c3.metric("This Month Income", f"Rs. {stats['this_month_income']:,.0f}")
+    c4.metric("Total Income (All Time)", f"Rs. {stats['total_income']:,.0f}")
 
-st.divider()
-st.subheader("Recent Members")
-df = get_all_members()
-if df.empty:
-    st.info("No members yet — add your first member from the **Members** page.")
-else:
-    st.dataframe(
-        df[["id", "full_name", "phone", "membership_type", "time_slot", "status", "join_date"]].head(10),
-        use_container_width=True, hide_index=True,
-    )
-
-st.markdown('</div>', unsafe_allow_html=True)
+    st.divider()
+    st.subheader("Recent Members")
+    df = get_all_members()
+    if df.empty:
+        st.info("No members yet — add your first member from the **Members** page.")
+    else:
+        st.dataframe(
+            df[["id", "full_name", "phone", "membership_type", "time_slot", "status", "join_date"]].head(10),
+            use_container_width=True, hide_index=True,
+        )
