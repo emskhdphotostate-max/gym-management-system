@@ -1,6 +1,6 @@
 """
 Generates PDF chalans (fee receipts) and member list reports.
-Uses fpdf2 — pure python, no system dependencies, works on Streamlit Cloud.
+Uses fpdf2 - pure python, no system dependencies, works on Streamlit Cloud.
 """
 
 from fpdf import FPDF
@@ -10,6 +10,13 @@ from datetime import date
 ORANGE = (240, 149, 90)
 PINK = (224, 100, 110)
 DARK = (74, 74, 74)
+
+
+def safe_text(value) -> str:
+    """fpdf2's default core fonts only support Latin-1. Any character outside that
+    (curly quotes, em-dashes, Urdu/Arabic script, emoji, etc.) would crash PDF
+    generation. This converts anything unsupported into a safe '?' instead of failing."""
+    return str(value).encode("latin-1", "replace").decode("latin-1")
 
 
 class ChalanPDF(FPDF):
@@ -23,7 +30,7 @@ class ChalanPDF(FPDF):
         self.set_text_color(255, 255, 255)
         self.set_font("Helvetica", "B", 18)
         self.set_xy(10, 7)
-        self.cell(0, 10, self.gym_name, align="L")
+        self.cell(0, 10, safe_text(self.gym_name), align="L")
         self.set_font("Helvetica", "", 11)
         self.set_xy(10, 16)
         self.cell(0, 6, "Fee Chalan / Receipt", align="L")
@@ -45,14 +52,14 @@ def generate_chalan_pdf(gym_name: str, fee_row) -> bytes:
         pdf.cell(0, 8, str(value))
         pdf.ln(8)
 
-    row("Chalan No:", fee_row.chalan_no)
-    row("Date:", str(fee_row.paid_date))
-    row("Member Name:", fee_row.full_name)
-    row("Phone:", fee_row.phone or "-")
-    row("Membership Type:", fee_row.membership_type or "-")
-    row("Fee For:", f"{fee_row.month} {fee_row.year}")
-    row("Payment Method:", fee_row.payment_method)
-    row("Status:", fee_row.status)
+    row("Chalan No:", safe_text(fee_row.chalan_no))
+    row("Date:", safe_text(fee_row.paid_date))
+    row("Member Name:", safe_text(fee_row.full_name))
+    row("Phone:", safe_text(fee_row.phone or "-"))
+    row("Membership Type:", safe_text(fee_row.membership_type or "-"))
+    row("Fee For:", safe_text(f"{fee_row.month} {fee_row.year}"))
+    row("Payment Method:", safe_text(fee_row.payment_method))
+    row("Status:", safe_text(fee_row.status))
 
     pdf.ln(4)
     pdf.set_draw_color(*ORANGE)
@@ -67,7 +74,7 @@ def generate_chalan_pdf(gym_name: str, fee_row) -> bytes:
 
     pdf.set_font("Helvetica", "I", 9)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, f"Generated on {date.today()} — Thank you for training with us!")
+    pdf.cell(0, 6, f"Generated on {date.today()} - Thank you for training with us!")
 
     return bytes(pdf.output())
 
@@ -94,8 +101,8 @@ def generate_members_report_pdf(gym_name: str, df) -> bytes:
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(*DARK)
     for _, r in df.iterrows():
-        values = [str(r["id"]), str(r["full_name"])[:25], str(r["phone"] or "-"),
-                   str(r["membership_type"]), str(r["time_slot"]), str(r["status"])]
+        values = [safe_text(r["id"]), safe_text(str(r["full_name"])[:25]), safe_text(r["phone"] or "-"),
+                   safe_text(r["membership_type"]), safe_text(r["time_slot"]), safe_text(r["status"])]
         for w, v in zip(col_widths, values):
             pdf.cell(w, 7, v, border=1)
         pdf.ln()
@@ -125,8 +132,8 @@ def generate_fee_history_pdf(gym_name: str, df) -> bytes:
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(*DARK)
     for _, r in df.iterrows():
-        values = [str(r["chalan_no"]), str(r["full_name"])[:22], f"Rs.{float(r['amount']):,.0f}",
-                   f"{r['month']} {r['year']}", str(r["payment_method"]), str(r["status"])]
+        values = [safe_text(r["chalan_no"]), safe_text(str(r["full_name"])[:22]), f"Rs.{float(r['amount']):,.0f}",
+                   safe_text(f"{r['month']} {r['year']}"), safe_text(r["payment_method"]), safe_text(r["status"])]
         for w, v in zip(col_widths, values):
             pdf.cell(w, 7, v, border=1)
         pdf.ln()
