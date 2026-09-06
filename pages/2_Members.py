@@ -11,11 +11,11 @@ require_login()
 
 GYM_NAME = st.secrets.get("GYM_NAME", "IRON PULSE GYM")
 
-# Fee presets
-FEE_MAP = {
-    "Standard": 2000.0,
-    "Premium": 3000.0,
-    "VIP": 5000.0,
+# Fee presets with descriptions
+MEMBERSHIP_OPTIONS = {
+    "Standard": {"fee": 2000.0, "label": "Standard", "desc": "Basic gym access"},
+    "Premium": {"fee": 3000.0, "label": "Premium", "desc": "Gym + Equipment priority"},
+    "VIP": {"fee": 5000.0, "label": "VIP + Personal Guidance", "desc": "Gym + Personal trainer guidance"},
 }
 
 # Helper to convert uploaded photo to base64
@@ -58,12 +58,20 @@ with st.container(border=True):
     with tab1:
         st.markdown("### 📝 Register New Member")
 
-        c_type, c_fee = st.columns([1, 1])
-        with c_type:
-            selected_type = st.selectbox("Membership Type *", ["Standard", "Premium", "VIP"], key="add_mem_type")
-        with c_fee:
-            auto_fee = FEE_MAP.get(selected_type, 2000.0)
-            monthly_fee = st.number_input("Monthly Fee (Rs.)", min_value=0.0, step=500.0, value=auto_fee, key="add_mem_fee")
+        # Membership type selection
+        selected_type = st.selectbox(
+            "Membership Type *",
+            options=list(MEMBERSHIP_OPTIONS.keys()),
+            format_func=lambda x: MEMBERSHIP_OPTIONS[x]["label"],
+            key="add_mem_type"
+        )
+
+        # Auto-fill fee based on selection
+        auto_fee = MEMBERSHIP_OPTIONS[selected_type]["fee"]
+        membership_desc = MEMBERSHIP_OPTIONS[selected_type]["desc"]
+
+        # Display package info
+        st.info(f"📦 **{MEMBERSHIP_OPTIONS[selected_type]['label']}** Package — {membership_desc} — **Rs. {auto_fee:,.0f}/month**")
 
         with st.form("add_member_form", clear_on_submit=True):
             c1, c2 = st.columns(2)
@@ -77,6 +85,9 @@ with st.container(border=True):
             c5, c6 = st.columns(2)
             time_slot = c5.selectbox("Preferred Workout Timing", ["Morning", "Evening", "Both"])
             join_date = c6.date_input("Registration / Join Date", value=date.today())
+
+            # Display monthly fee (read-only display, locked to package)
+            monthly_fee = st.number_input("Monthly Fee (Rs.)", min_value=0.0, step=500.0, value=auto_fee, disabled=False)
 
             address = st.text_area("Home / Office Address", height=70, placeholder="Address details...")
 
@@ -105,7 +116,7 @@ with st.container(border=True):
                         "status": "Active",
                         "photo": photo_b64,
                     })
-                    st.success(f"🎉 **{full_name}** successfully registered as **{selected_type}** member (Fee: Rs. {monthly_fee:,.0f})!")
+                    st.success(f"🎉 **{full_name}** successfully registered as **{MEMBERSHIP_OPTIONS[selected_type]['label']}** member (Fee: Rs. {monthly_fee:,.0f})!")
                     st.rerun()
 
     # ---------------- TAB 2: MEMBER DIRECTORY ----------------
@@ -144,6 +155,7 @@ with st.container(border=True):
 
                     with col_info:
                         status_badge = '<span class="status-active">🟢 Active</span>' if r["status"] == "Active" else '<span class="status-inactive">🔴 Inactive</span>'
+                        display_type = MEMBERSHIP_OPTIONS.get(r["membership_type"], {}).get("label", r["membership_type"])
                         st.markdown(f"### {r['full_name']} {status_badge}", unsafe_allow_html=True)
                         st.write(f"📞 **Phone:** {r['phone']} | ✉️ **Email:** {r['email'] or 'N/A'}")
                         st.caption(f"🗓️ Joined: {r['join_date']} | ⏰ Slot: **{r['time_slot']}**")
@@ -153,7 +165,7 @@ with st.container(border=True):
                         st.markdown(f"""
                         <div style="background:rgba(241,245,249,0.8); padding:10px 15px; border-radius:12px; border-left:4px solid {type_color};">
                             <div style="font-size:0.8rem; color:#64748b; font-weight:700;">MEMBERSHIP</div>
-                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">{r['membership_type']}</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:#0f172a;">{display_type}</div>
                             <div style="font-size:0.95rem; font-weight:700; color:#10b981;">Rs. {float(r['monthly_fee']):,.0f} / mo</div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -174,14 +186,17 @@ with st.container(border=True):
             m = get_member(member_id)
 
             if m:
-                # Type and Fee selection with auto update
+                # Type selection with auto-fee
                 edit_type = st.selectbox(
                     "Membership Type",
-                    ["Standard", "Premium", "VIP"],
-                    index=["Standard", "Premium", "VIP"].index(m.membership_type) if m.membership_type in ["Standard", "Premium", "VIP"] else 0,
+                    options=list(MEMBERSHIP_OPTIONS.keys()),
+                    format_func=lambda x: MEMBERSHIP_OPTIONS[x]["label"],
+                    index=list(MEMBERSHIP_OPTIONS.keys()).index(m.membership_type) if m.membership_type in MEMBERSHIP_OPTIONS else 0,
                     key="edit_mem_type"
                 )
-                default_edit_fee = float(m.monthly_fee) if m.monthly_fee else FEE_MAP.get(edit_type, 2000.0)
+
+                auto_edit_fee = MEMBERSHIP_OPTIONS[edit_type]["fee"]
+                st.info(f"📦 **{MEMBERSHIP_OPTIONS[edit_type]['label']}** — {MEMBERSHIP_OPTIONS[edit_type]['desc']} — **Rs. {auto_edit_fee:,.0f}/month**")
 
                 with st.form("edit_member_form"):
                     c1, c2 = st.columns(2)
@@ -197,7 +212,7 @@ with st.container(border=True):
                     )
 
                     c5, c6 = st.columns(2)
-                    e_fee = c5.number_input("Monthly Fee (Rs.)", min_value=0.0, step=500.0, value=default_edit_fee)
+                    e_fee = c5.number_input("Monthly Fee (Rs.)", min_value=0.0, step=500.0, value=auto_edit_fee)
                     e_slot = c6.selectbox(
                         "Timing Slot",
                         ["Morning", "Evening", "Both"],
