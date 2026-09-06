@@ -386,6 +386,20 @@ APP_CSS = """
         transition: all 0.2s ease !important;
     }
 
+    /* CRITICAL FIX: Force white text on all buttons */
+    div[data-testid="stAppViewContainer"] div.stButton > button *,
+    div[data-testid="stAppViewContainer"] .stDownloadButton > button *,
+    div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button *,
+    div[data-testid="stAppViewContainer"] div.stButton > button p,
+    div[data-testid="stAppViewContainer"] .stDownloadButton > button p,
+    div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button p,
+    div[data-testid="stAppViewContainer"] div.stButton > button span,
+    div[data-testid="stAppViewContainer"] .stDownloadButton > button span,
+    div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
     div[data-testid="stAppViewContainer"] div.stButton > button:hover,
     div[data-testid="stAppViewContainer"] .stDownloadButton > button:hover,
     div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button:hover {
