@@ -7,9 +7,14 @@ from fpdf import FPDF
 from datetime import date
 
 
-ORANGE = (240, 149, 90)
-PINK = (224, 100, 110)
-DARK = (74, 74, 74)
+# Premium Color Palette
+PRIMARY = (99, 102, 241)      # Indigo
+SECONDARY = (236, 72, 153)    # Pink
+ACCENT = (14, 165, 233)       # Sky Blue
+DARK = (15, 23, 42)           # Slate Dark
+GRAY = (71, 85, 105)          # Slate Gray
+LIGHT_BG = (241, 245, 249)    # Light Gray
+SUCCESS = (34, 197, 94)       # Green
 
 
 def safe_text(value) -> str:
@@ -25,56 +30,149 @@ class ChalanPDF(FPDF):
         self.gym_name = gym_name
 
     def header(self):
-        self.set_fill_color(*ORANGE)
-        self.rect(0, 0, 210, 25, "F")
-        self.set_text_color(255, 255, 255)
-        self.set_font("Helvetica", "B", 18)
-        self.set_xy(10, 7)
-        self.cell(0, 10, safe_text(self.gym_name), align="L")
-        self.set_font("Helvetica", "", 11)
-        self.set_xy(10, 16)
-        self.cell(0, 6, "Fee Chalan / Receipt", align="L")
-        self.ln(20)
+        # Premium gradient-style header with modern design
+        # Top accent bar
+        self.set_fill_color(*PRIMARY)
+        self.rect(0, 0, 210, 4, "F")
+
+        # Main header area
+        self.set_fill_color(248, 250, 252)
+        self.rect(0, 4, 210, 35, "F")
+
+        # Gym name - large and bold
+        self.set_text_color(*DARK)
+        self.set_font("Helvetica", "B", 22)
+        self.set_xy(15, 12)
+        self.cell(0, 8, safe_text(self.gym_name), align="L")
+
+        # Subtitle with modern badge
+        self.set_font("Helvetica", "B", 11)
+        self.set_text_color(*PRIMARY)
+        self.set_xy(15, 24)
+        self.cell(0, 6, "PAYMENT RECEIPT", align="L")
+
+        # Professional divider line
+        self.set_draw_color(*PRIMARY)
+        self.set_line_width(0.8)
+        self.line(15, 38, 195, 38)
+
+        self.ln(35)
 
 
 def generate_chalan_pdf(gym_name: str, fee_row) -> bytes:
     """fee_row is the SQLAlchemy row from get_fee_by_chalan (has fee + member fields)."""
     pdf = ChalanPDF(gym_name)
     pdf.add_page()
+    pdf.ln(8)
+
+    # Chalan number and date in premium boxes (side by side)
+    pdf.set_fill_color(*LIGHT_BG)
+
+    # Left box - Chalan No
+    pdf.set_xy(15, pdf.get_y())
+    pdf.set_fill_color(241, 245, 249)
+    pdf.rect(15, pdf.get_y(), 85, 18, "F")
+    pdf.set_font("Helvetica", "", 9)
+    pdf.set_text_color(*GRAY)
+    pdf.set_xy(15, pdf.get_y() + 3)
+    pdf.cell(85, 5, "RECEIPT NO.", align="L")
+    pdf.set_xy(15, pdf.get_y() + 5)
+    pdf.set_font("Helvetica", "B", 13)
     pdf.set_text_color(*DARK)
-    pdf.set_font("Helvetica", "", 11)
-    pdf.ln(5)
+    pdf.cell(85, 5, safe_text(fee_row.chalan_no), align="L")
 
-    def row(label, value):
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.cell(50, 8, label)
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 8, str(value))
-        pdf.ln(8)
+    # Right box - Date
+    pdf.set_xy(110, pdf.get_y() - 10)
+    pdf.set_fill_color(241, 245, 249)
+    pdf.rect(110, pdf.get_y(), 85, 18, "F")
+    pdf.set_font("Helvetica", "", 9)
+    pdf.set_text_color(*GRAY)
+    pdf.set_xy(110, pdf.get_y() + 3)
+    pdf.cell(85, 5, "DATE", align="L")
+    pdf.set_xy(110, pdf.get_y() + 5)
+    pdf.set_font("Helvetica", "B", 13)
+    pdf.set_text_color(*DARK)
+    pdf.cell(85, 5, safe_text(fee_row.paid_date), align="L")
 
-    row("Chalan No:", safe_text(fee_row.chalan_no))
-    row("Date:", safe_text(fee_row.paid_date))
-    row("Member Name:", safe_text(fee_row.full_name))
-    row("Phone:", safe_text(fee_row.phone or "-"))
-    row("Membership Type:", safe_text(fee_row.membership_type or "-"))
-    row("Fee For:", safe_text(f"{fee_row.month} {fee_row.year}"))
-    row("Payment Method:", safe_text(fee_row.payment_method))
-    row("Status:", safe_text(fee_row.status))
+    pdf.ln(25)
 
-    pdf.ln(4)
-    pdf.set_draw_color(*ORANGE)
-    pdf.set_line_width(0.5)
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-    pdf.ln(6)
+    # Member details section with modern card design
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_text_color(*PRIMARY)
+    pdf.cell(0, 6, "MEMBER INFORMATION", align="L")
+    pdf.ln(8)
 
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.set_text_color(*PINK)
-    pdf.cell(0, 10, f"Total Paid: Rs. {float(fee_row.amount):,.2f}")
-    pdf.ln(15)
+    # White card background for member info
+    pdf.set_fill_color(255, 255, 255)
+    pdf.rect(15, pdf.get_y(), 180, 50, "D")
+    pdf.set_draw_color(226, 232, 240)
+
+    y_start = pdf.get_y()
+
+    def info_row(label, value, y_pos):
+        pdf.set_xy(20, y_pos)
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(*GRAY)
+        pdf.cell(60, 6, label, align="L")
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_text_color(*DARK)
+        pdf.cell(0, 6, safe_text(value), align="L")
+
+    info_row("Member Name:", fee_row.full_name, y_start + 5)
+    info_row("Phone Number:", fee_row.phone or "-", y_start + 13)
+    info_row("Membership Type:", fee_row.membership_type or "-", y_start + 21)
+    info_row("Fee Period:", f"{fee_row.month} {fee_row.year}", y_start + 29)
+    info_row("Payment Method:", fee_row.payment_method, y_start + 37)
+
+    pdf.ln(58)
+
+    # Payment summary section with highlighted amount box
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_text_color(*PRIMARY)
+    pdf.cell(0, 6, "PAYMENT SUMMARY", align="L")
+    pdf.ln(10)
+
+    # Large amount box with gradient-like effect
+    pdf.set_fill_color(*PRIMARY)
+    pdf.rect(15, pdf.get_y(), 180, 28, "F")
+
+    # Amount display
+    pdf.set_xy(15, pdf.get_y() + 5)
+    pdf.set_font("Helvetica", "", 10)
+    pdf.set_text_color(255, 255, 255)
+    pdf.cell(180, 5, "TOTAL AMOUNT PAID", align="C")
+    pdf.set_xy(15, pdf.get_y() + 5)
+    pdf.set_font("Helvetica", "B", 20)
+    pdf.cell(180, 8, f"Rs. {float(fee_row.amount):,.2f}", align="C")
+
+    pdf.ln(32)
+
+    # Status badge
+    pdf.set_xy(15, pdf.get_y())
+    pdf.set_fill_color(*SUCCESS)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(30, 7, f" {safe_text(fee_row.status)} ", align="C", fill=True)
+
+    pdf.ln(20)
+
+    # Footer with thank you message
+    pdf.set_draw_color(*LIGHT_BG)
+    pdf.set_line_width(0.3)
+    pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+    pdf.ln(8)
 
     pdf.set_font("Helvetica", "I", 9)
-    pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, f"Generated on {date.today()} - Thank you for training with us!")
+    pdf.set_text_color(*GRAY)
+    pdf.cell(0, 5, f"Generated on {date.today()}", align="C")
+    pdf.ln(5)
+    pdf.set_font("Helvetica", "", 9)
+    pdf.set_text_color(*PRIMARY)
+    pdf.cell(0, 5, "Thank you for training with us!", align="C")
+    pdf.ln(3)
+    pdf.set_font("Helvetica", "I", 8)
+    pdf.set_text_color(*GRAY)
+    pdf.cell(0, 5, "This is a computer-generated receipt and does not require a signature.", align="C")
 
     return bytes(pdf.output())
 
