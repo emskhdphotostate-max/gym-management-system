@@ -238,45 +238,70 @@ APP_CSS = """
         box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3) !important;
     }
 
-    section[data-testid="stSidebar"] * {
-        color: #f8fafc !important;
-    }
-
     /* Sidebar Logo Header */
     .sidebar-brand {
         text-align: center;
         padding: 0.5rem 0 1rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 1rem;
     }
 
     .sidebar-brand-name {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+        background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-top: 0.4rem;
         letter-spacing: -0.3px;
     }
 
-    /* Custom Sidebar Nav Links */
-    [data-testid="stPageLink-NavLink"] {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.06) !important;
-        border-radius: 12px !important;
-        padding: 0.65rem 1rem !important;
-        margin-bottom: 0.35rem !important;
-        transition: all 0.22s ease !important;
+    /* CRITICAL FIX: Bright White Text on Dark Sidebar Navigation Links */
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"],
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] *,
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] p,
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] span,
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] div,
+    section[data-testid="stSidebar"] a,
+    section[data-testid="stSidebar"] a * {
+        color: #ffffff !important;
         font-weight: 600 !important;
-        font-size: 0.92rem !important;
+        font-size: 0.95rem !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
 
-    [data-testid="stPageLink-NavLink"]:hover {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(236, 72, 153, 0.2) 100%) !important;
-        border-color: rgba(165, 180, 252, 0.4) !important;
-        transform: translateX(4px) !important;
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
+        padding: 0.7rem 1rem !important;
+        margin-bottom: 0.45rem !important;
+        transition: all 0.22s ease !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stPageLink-NavLink"]:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.45) 0%, rgba(236, 72, 153, 0.35) 100%) !important;
+        border-color: rgba(165, 180, 252, 0.5) !important;
+        transform: translateX(5px) !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    /* VIP Sidebar Logout Button */
+    section[data-testid="stSidebar"] div.stButton > button,
+    section[data-testid="stSidebar"] button {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
         color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.3px !important;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35) !important;
+    }
+
+    section[data-testid="stSidebar"] div.stButton > button * {
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }
 
     /* VIP Main Container Header */
@@ -347,10 +372,10 @@ APP_CSS = """
         font-size: 1.65rem !important;
     }
 
-    /* Buttons */
-    div.stButton > button,
-    .stDownloadButton > button,
-    div[data-testid="stFormSubmitButton"] > button {
+    /* Main Area Buttons */
+    div[data-testid="stAppViewContainer"] div.stButton > button,
+    div[data-testid="stAppViewContainer"] .stDownloadButton > button,
+    div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
         color: #ffffff !important;
         border: none !important;
@@ -361,18 +386,12 @@ APP_CSS = """
         transition: all 0.2s ease !important;
     }
 
-    div.stButton > button:hover,
-    .stDownloadButton > button:hover,
-    div[data-testid="stFormSubmitButton"] > button:hover {
+    div[data-testid="stAppViewContainer"] div.stButton > button:hover,
+    div[data-testid="stAppViewContainer"] .stDownloadButton > button:hover,
+    div[data-testid="stAppViewContainer"] div[data-testid="stFormSubmitButton"] > button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 22px rgba(79, 70, 229, 0.4) !important;
         opacity: 0.95 !important;
-    }
-
-    /* Logout Button Specific Red Accent */
-    .logout-btn button {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
     }
 
     /* Form Inputs */
