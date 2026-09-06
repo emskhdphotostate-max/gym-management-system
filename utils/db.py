@@ -35,6 +35,7 @@ def init_db():
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS members (
                 id SERIAL PRIMARY KEY,
+                member_code VARCHAR(20) UNIQUE,
                 full_name VARCHAR(150) NOT NULL,
                 phone VARCHAR(30),
                 email VARCHAR(150),
@@ -57,6 +58,23 @@ def init_db():
                     ALTER TABLE members ADD COLUMN photo TEXT;
                 END IF;
             END $$;
+        """))
+
+        # Add member_code column if it doesn't exist
+        conn.execute(text("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='members' AND column_name='member_code') THEN
+                    ALTER TABLE members ADD COLUMN member_code VARCHAR(20) UNIQUE;
+                END IF;
+            END $$;
+        """))
+
+        # Generate member codes for existing members without one
+        conn.execute(text("""
+            UPDATE members
+            SET member_code = 'GYM' || LPAD(id::text, 3, '0')
+            WHERE member_code IS NULL;
         """))
 
         conn.execute(text("""
@@ -154,12 +172,16 @@ def get_admin_by_username(username: str):
 def add_member(data: dict):
     engine = get_engine()
     with engine.begin() as conn:
+        # Get next member number
+        max_id = conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM members")).scalar()
+        member_code = f"GYM{max_id + 1:03d}"
+
         conn.execute(text("""
-            INSERT INTO members (full_name, phone, email, address, gender,
+            INSERT INTO members (member_code, full_name, phone, email, address, gender,
                 membership_type, monthly_fee, time_slot, join_date, status, photo)
-            VALUES (:full_name, :phone, :email, :address, :gender,
+            VALUES (:member_code, :full_name, :phone, :email, :address, :gender,
                 :membership_type, :monthly_fee, :time_slot, :join_date, :status, :photo)
-        """), data)
+        """), {**data, "member_code": member_code})
 
 
 def update_member(member_id: int, data: dict):
@@ -203,12 +225,29 @@ def generate_chalan_no():
 def add_fee(data: dict):
     engine = get_engine()
     with engine.begin() as conn:
+        # Check if fee already exists for this member, month, and year
+        existing = conn.execute(text("""
+            SELECT chalan_no FROM fees
+            WHERE member_id = :member_id
+            AND month = :month
+            AND year = :year
+        """), {
+            "member_id": data["member_id"],
+            "month": data["month"],
+            "year": data["year"]
+        }).fetchone()
+
+        if existing:
+            # Return existing chalan number instead of creating duplicate
+            return existing[0]
+
         conn.execute(text("""
             INSERT INTO fees (member_id, chalan_no, amount, month, year,
                 payment_method, status, paid_date)
             VALUES (:member_id, :chalan_no, :amount, :month, :year,
                 :payment_method, :status, :paid_date)
         """), data)
+        return data["chalan_no"]
 
 
 def get_fees_for_member(member_id: int) -> pd.DataFrame:
@@ -222,7 +261,7 @@ def get_fees_for_member(member_id: int) -> pd.DataFrame:
 def get_all_fees() -> pd.DataFrame:
     engine = get_engine()
     return pd.read_sql(text("""
-        SELECT f.*, m.full_name, m.phone
+        SELECT f.*, m.full_name, m.phone, m.member_code
         FROM fees f JOIN members m ON f.member_id = m.id
         ORDER BY f.id DESC
     """), engine)
@@ -232,7 +271,7 @@ def get_fee_by_chalan(chalan_no: str):
     engine = get_engine()
     with engine.begin() as conn:
         return conn.execute(text("""
-            SELECT f.*, m.full_name, m.phone, m.email, m.membership_type
+            SELECT f.*, m.full_name, m.phone, m.email, m.membership_type, m.member_code
             FROM fees f JOIN members m ON f.member_id = m.id
             WHERE f.chalan_no = :c
         """), {"c": chalan_no}).fetchone()

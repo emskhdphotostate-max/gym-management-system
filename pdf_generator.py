@@ -104,7 +104,7 @@ def generate_chalan_pdf(gym_name: str, fee_row) -> bytes:
 
     # White card background for member info
     pdf.set_fill_color(255, 255, 255)
-    pdf.rect(15, pdf.get_y(), 180, 50, "D")
+    pdf.rect(15, pdf.get_y(), 180, 58, "D")
     pdf.set_draw_color(226, 232, 240)
 
     y_start = pdf.get_y()
@@ -118,13 +118,14 @@ def generate_chalan_pdf(gym_name: str, fee_row) -> bytes:
         pdf.set_text_color(*DARK)
         pdf.cell(0, 6, safe_text(value), align="L")
 
-    info_row("Member Name:", fee_row.full_name, y_start + 5)
-    info_row("Phone Number:", fee_row.phone or "-", y_start + 13)
-    info_row("Membership Type:", fee_row.membership_type or "-", y_start + 21)
-    info_row("Fee Period:", f"{fee_row.month} {fee_row.year}", y_start + 29)
-    info_row("Payment Method:", fee_row.payment_method, y_start + 37)
+    info_row("Member ID:", fee_row.member_code or "-", y_start + 5)
+    info_row("Member Name:", fee_row.full_name, y_start + 13)
+    info_row("Phone Number:", fee_row.phone or "-", y_start + 21)
+    info_row("Membership Type:", fee_row.membership_type or "-", y_start + 29)
+    info_row("Fee Period:", f"{fee_row.month} {fee_row.year}", y_start + 37)
+    info_row("Payment Method:", fee_row.payment_method, y_start + 45)
 
-    pdf.ln(58)
+    pdf.ln(66)
 
     # Payment summary section with highlighted amount box
     pdf.set_font("Helvetica", "B", 12)

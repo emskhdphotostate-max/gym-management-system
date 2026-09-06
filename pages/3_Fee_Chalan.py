@@ -74,10 +74,11 @@ with st.container(border=True):
 
             # Download button OUTSIDE form to avoid StreamlitInvalidLayoutContextError
             if submitted:
-                chalan_no = generate_chalan_no()
-                add_fee({
+                generated_chalan = generate_chalan_no()
+                # add_fee returns the chalan_no (existing or new)
+                chalan_no = add_fee({
                     "member_id": int(member_id),
-                    "chalan_no": chalan_no,
+                    "chalan_no": generated_chalan,
                     "amount": amount,
                     "month": month,
                     "year": int(year),
@@ -85,7 +86,12 @@ with st.container(border=True):
                     "status": "Paid",
                     "paid_date": paid_date,
                 })
-                st.success(f"✅ Fee collected successfully! Chalan No: **{chalan_no}**")
+
+                # Check if it's an existing chalan (duplicate prevention)
+                if chalan_no != generated_chalan:
+                    st.warning(f"⚠️ Fee already paid for {month} {year}. Existing Chalan No: **{chalan_no}**")
+                else:
+                    st.success(f"✅ Fee collected successfully! Chalan No: **{chalan_no}**")
 
                 fee_row = get_fee_by_chalan(chalan_no)
                 pdf_bytes = generate_chalan_pdf(GYM_NAME, fee_row)
