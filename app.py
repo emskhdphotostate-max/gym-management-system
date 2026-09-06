@@ -51,7 +51,7 @@ if st.session_state.get("logged_in"):
 st.markdown('<div class="logo-container">', unsafe_allow_html=True)
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    st.image("assets/logo.png", use_column_width=True)
+    st.image("assets/logo.png", width=120)
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f'<div class="login-title">Login</div>', unsafe_allow_html=True)
