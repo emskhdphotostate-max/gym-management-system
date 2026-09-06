@@ -47,15 +47,19 @@ except Exception as e:
 if st.session_state.get("logged_in"):
     st.switch_page("pages/1_Dashboard.py")
 
-# Premium logo container with proper centering
-st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-col1, col2, col3 = st.columns([1, 1, 1])
-with col2:
-    st.image("assets/logo.png", width=120)
-st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown(f'<div class="login-title">Login</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="login-sub">{GYM_NAME} — Admin Panel</div>', unsafe_allow_html=True)
+# Premium VIP logo with centered badge
+st.markdown('''
+<div class="vip-header">
+    <div class="vip-logo-badge">
+        <img src="https://raw.githubusercontent.com/emskhdphotostate-max/gym-management-system/main/assets/logo.png" alt="Gym Logo">
+    </div>
+    <div class="vip-title">Login</div>
+    <div class="vip-subtitle">
+        {gym_name}
+        <span class="vip-tag">Admin Panel</span>
+    </div>
+</div>
+'''.replace('{gym_name}', GYM_NAME), unsafe_allow_html=True)
 
 if not db_ready:
     st.error(
@@ -77,8 +81,9 @@ else:
                 st.error("❌ Invalid username or password.")
 
     st.markdown(
-        "<p style='text-align:center; color:#9a9a9a; font-size:0.85rem; margin-top:0.5rem;'>"
-        "Default demo login: <b>admin</b> / <b>Admin@123</b><br>"
-        "(change this in .streamlit/secrets.toml)</p>",
+        '<div class="vip-demo-badge">'
+        '<strong>Default demo login:</strong> admin / Admin@123<br>'
+        '(change this in .streamlit/secrets.toml)'
+        '</div>',
         unsafe_allow_html=True,
     )
