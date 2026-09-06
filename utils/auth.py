@@ -47,4 +47,8 @@ def require_login():
     """Call this at the top of every internal page. Redirects to login if not authenticated."""
     if not st.session_state.get("logged_in"):
         st.warning("⚠️ Please login first.")
+        st.markdown(
+            '<meta http-equiv="refresh" content="0;url=/" />',
+            unsafe_allow_html=True
+        )
         st.stop()

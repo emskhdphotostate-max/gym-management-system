@@ -72,29 +72,29 @@ with st.container(border=True):
 
                 submitted = st.form_submit_button("💳 Collect Fee & Generate Chalan", use_container_width=True)
 
-                if submitted:
-                    chalan_no = generate_chalan_no()
-                    add_fee({
-                        "member_id": int(member_id),
-                        "chalan_no": chalan_no,
-                        "amount": amount,
-                        "month": month,
-                        "year": int(year),
-                        "payment_method": payment_method,
-                        "status": "Paid",
-                        "paid_date": paid_date,
-                    })
-                    st.success(f"✅ Fee collected successfully! Chalan No: **{chalan_no}**")
+            # Download button OUTSIDE form to avoid StreamlitInvalidLayoutContextError
+            if submitted:
+                chalan_no = generate_chalan_no()
+                add_fee({
+                    "member_id": int(member_id),
+                    "chalan_no": chalan_no,
+                    "amount": amount,
+                    "month": month,
+                    "year": int(year),
+                    "payment_method": payment_method,
+                    "status": "Paid",
+                    "paid_date": paid_date,
+                })
+                st.success(f"✅ Fee collected successfully! Chalan No: **{chalan_no}**")
 
-                    fee_row = get_fee_by_chalan(chalan_no)
-                    pdf_bytes = generate_chalan_pdf(GYM_NAME, fee_row)
-                    st.download_button(
-                        "⬇️ Download Payment Receipt (PDF)",
-                        data=pdf_bytes,
-                        file_name=f"{chalan_no}.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                    )
+                fee_row = get_fee_by_chalan(chalan_no)
+                pdf_bytes = generate_chalan_pdf(GYM_NAME, fee_row)
+                st.download_button(
+                    "⬇️ Download Payment Receipt (PDF)",
+                    data=pdf_bytes,
+                    file_name=f"{chalan_no}.pdf",
+                    mime="application/pdf",
+                )
 
     with tab2:
         st.markdown("### 📜 All Fee Records")
