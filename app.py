@@ -10,6 +10,26 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# Hide sidebar completely on login page
+st.markdown("""
+<style>
+    /* Hide entire sidebar on login page */
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+    section[data-testid="stSidebar"] {
+        display: none !important;
+    }
+    /* Hide sidebar nav links */
+    [data-testid="stSidebarNav"] {
+        display: none !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 inject_login_css()
 
 GYM_NAME = st.secrets.get("GYM_NAME", "IRON PULSE GYM")
@@ -23,28 +43,16 @@ except Exception as e:
     db_ready = False
     db_error = str(e)
 
-st.markdown("""
-<style>
-    div[data-testid="stForm"] {
-        background: #ffffff;
-        border-radius: 24px;
-        padding: 2.5rem 2.5rem 1.5rem 2.5rem;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.35);
-        max-width: 420px;
-        margin: 3rem auto 0 auto;
-    }
-    .login-title { text-align: center; font-size: 2.2rem; font-weight: 800; color: #4a4a4a; margin-bottom: 0.2rem;}
-    .login-sub { text-align: center; color: #9a9a9a; margin-bottom: 1.8rem; font-size: 0.95rem;}
-    .logo-wrap { display: flex; justify-content: center; margin-bottom: 0.5rem; }
-</style>
-""", unsafe_allow_html=True)
 
 if st.session_state.get("logged_in"):
     st.switch_page("pages/1_Dashboard.py")
 
-col1, col2, col3 = st.columns([1, 2, 1])
+# Premium logo container with proper centering
+st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    st.image("assets/logo.png", width=90)
+    st.image("assets/logo.png", use_column_width=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f'<div class="login-title">Login</div>', unsafe_allow_html=True)
 st.markdown(f'<div class="login-sub">{GYM_NAME} — Admin Panel</div>', unsafe_allow_html=True)

@@ -1,49 +1,133 @@
 import streamlit as st
 
-# ---------- Login page theme (dark blue, matches the reference design) ----------
+# ---------- Login page theme (premium gradient) ----------
 LOGIN_CSS = """
 <style>
-    div[data-testid="stSidebarNav"] {
-        display: none;
+    html, body, [class*="css"] {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
     }
-    html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
 
+    /* Hide Streamlit's default nav completely on login */
+    div[data-testid="stSidebarNav"],
+    [data-testid="stSidebarNavItems"],
+    ul[data-testid="stSidebarNavItems"] {
+        display: none !important;
+    }
+
+    /* Premium gradient background */
     .stApp {
-        background: radial-gradient(circle at 30% 20%, #1e3a9c 0%, #14237a 45%, #0d1a5c 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        min-height: 100vh;
     }
 
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Premium glassmorphism card */
     div[data-testid="stForm"] {
-        background: #ffffff;
-        border-radius: 24px;
-        padding: 2.5rem 2.5rem 1.5rem 2.5rem;
-        box-shadow: 0 25px 60px rgba(0,0,0,0.35);
-        max-width: 420px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 30px;
+        padding: 3rem 2.5rem 2rem 2.5rem;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3),
+                    0 10px 30px rgba(102, 126, 234, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        max-width: 440px;
         margin: 3rem auto 0 auto;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    .login-title { text-align: center; font-size: 2.2rem; font-weight: 800; color: #4a4a4a; margin-bottom: 0.2rem;}
-    .login-sub { text-align: center; color: #9a9a9a; margin-bottom: 1.8rem; font-size: 0.95rem;}
 
-    div.stButton > button, .stDownloadButton > button, div[data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(90deg, #f0955a 0%, #e0646a 100%);
+    /* Logo container styling */
+    .logo-container {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Login title */
+    .login-title {
+        text-align: center;
+        font-size: 2.4rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.3rem;
+        letter-spacing: -0.5px;
+    }
+
+    /* Subtitle */
+    .login-sub {
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* Premium gradient button */
+    div.stButton > button,
+    .stDownloadButton > button,
+    div[data-testid="stFormSubmitButton"] > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white !important;
         border: none;
         border-radius: 30px;
-        padding: 0.6rem 1.6rem;
+        padding: 0.75rem 2rem;
         font-weight: 700;
         letter-spacing: 0.5px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
     }
+
+    div.stButton > button:hover,
+    div[data-testid="stFormSubmitButton"] > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Premium input fields */
     div[data-testid="stTextInput"] input {
-        border-radius: 30px !important;
+        border-radius: 15px !important;
+        border: 2px solid #e5e7eb !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem !important;
+        transition: all 0.3s ease !important;
+        background: #ffffff !important;
     }
+
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    }
+
+    /* Checkbox styling */
+    div[data-testid="stCheckbox"] {
+        margin: 0.5rem 0;
+    }
+
+    /* Hide Streamlit branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
 </style>
 """
 
-# ---------- Internal app theme (light, readable, dark sidebar) ----------
+# ---------- Internal app theme ----------
 APP_CSS = """
 <style>
-    /* Hide Streamlit's auto-generated page nav (we use our own custom menu below it) */
+    /* CRITICAL: Hide default Streamlit nav */
     div[data-testid="stSidebarNav"] {
-        display: none;
+        display: none !important;
     }
 
     html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; }
@@ -51,7 +135,7 @@ APP_CSS = """
         background: #f4f5fa;
     }
 
-    /* Dark navy sidebar with white text */
+    /* Dark navy sidebar */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #14237a 0%, #0d1a5c 100%);
     }
@@ -85,7 +169,7 @@ APP_CSS = """
         color: #ffffff !important;
     }
 
-    /* Card-style bordered containers (st.container(border=True)) */
+    /* Card-style containers */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background: #ffffff;
         border-radius: 18px;
@@ -117,7 +201,7 @@ APP_CSS = """
     div[data-testid="stMetric"] label { color: #6b7280 !important; }
     div[data-testid="stMetric"] div { color: #1f2430 !important; }
 
-    /* Inputs — light, pill shaped, readable */
+    /* Inputs */
     div[data-testid="stTextInput"] input,
     div[data-testid="stNumberInput"] input,
     div[data-testid="stDateInput"] input,
@@ -133,7 +217,7 @@ APP_CSS = """
     button[data-baseweb="tab"] { color: #3a3f4b !important; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #e0646a !important; }
 
-    /* Dataframes / tables */
+    /* Dataframes */
     div[data-testid="stDataFrame"] {
         background: #ffffff;
         border-radius: 12px;
@@ -150,6 +234,6 @@ def inject_app_css():
     st.markdown(APP_CSS, unsafe_allow_html=True)
 
 
-# Backward-compatible alias (older pages may still import this name)
+# Backward-compatible alias
 def inject_global_css():
     inject_app_css()
