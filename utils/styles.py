@@ -1,12 +1,19 @@
 import streamlit as st
 
-# ---------- Login page theme (premium dark blue gradient) ----------
+# ---------- Login page theme (premium gradient) ----------
 LOGIN_CSS = """
 <style>
     html, body, [class*="css"] {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
         padding: 0;
+    }
+
+    /* Hide Streamlit's default nav completely on login */
+    div[data-testid="stSidebarNav"],
+    [data-testid="stSidebarNavItems"],
+    ul[data-testid="stSidebarNavItems"] {
+        display: none !important;
     }
 
     /* Premium gradient background */
@@ -281,43 +288,6 @@ APP_CSS = """
     hr {
         margin: 1.5rem 0 !important;
         border-color: #e2e8f0 !important;
-    }
-</style>
-"""
-        color: white !important;
-    }
-
-    /* Metric cards */
-    div[data-testid="stMetric"] {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 1rem;
-        border: 1px solid #eceef5;
-        box-shadow: 0 2px 10px rgba(20,35,122,0.05);
-    }
-    div[data-testid="stMetric"] label { color: #6b7280 !important; }
-    div[data-testid="stMetric"] div { color: #1f2430 !important; }
-
-    /* Inputs — light, pill shaped, readable */
-    div[data-testid="stTextInput"] input,
-    div[data-testid="stNumberInput"] input,
-    div[data-testid="stDateInput"] input,
-    div[data-baseweb="select"] > div,
-    div[data-testid="stTextArea"] textarea {
-        border-radius: 10px !important;
-        background: #ffffff !important;
-        color: #1f2430 !important;
-        border: 1px solid #dfe2ee !important;
-    }
-
-    /* Tabs */
-    button[data-baseweb="tab"] { color: #3a3f4b !important; }
-    button[data-baseweb="tab"][aria-selected="true"] { color: #e0646a !important; }
-
-    /* Dataframes / tables */
-    div[data-testid="stDataFrame"] {
-        background: #ffffff;
-        border-radius: 12px;
     }
 </style>
 """
